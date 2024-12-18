@@ -19,9 +19,11 @@ struct ContentView: View {
             VStack {
                 ForEach(users) { p in
                     Text(p.firstName)
+                        .foregroundStyle(.colorDarkGray)
                 }
             }
         }
+        
         .padding()
         .task {
             await fetchData()
