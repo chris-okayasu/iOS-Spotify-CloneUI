@@ -32,8 +32,8 @@ struct ContentView: View {
     
     private func fetchData() async {
         do {
-            users = try await DatabaseHelper().getUsers()
-            products = try await DatabaseHelper().getProducts()
+            users = try await APIHelper().getUsers()
+            products = try await APIHelper().getProducts()
         } catch {
             
         }

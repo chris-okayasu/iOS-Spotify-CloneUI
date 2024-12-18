@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DatabaseHelper {
+struct APIHelper {
     
     func getProducts() async throws -> [Product] {
         guard let url = URL(string: "https://dummyjson.com/products") else {
