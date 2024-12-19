@@ -13,6 +13,8 @@ struct HomeView: View {
     @State private var selectedCategory: Category? = nil
     @State private var products: [Product] = []
     
+    @State private var isRefreshing = false //pull-to-refresh
+    
     var body: some View {
         ZStack{
             Color.colorBg.ignoresSafeArea() // full color of the screen
@@ -22,7 +24,12 @@ struct HomeView: View {
                     Section {
                         //MARK: Recents Section
                         recentsSection
-                        .padding(.horizontal)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                        
+                        if let product = products.first {
+                            newReleaseSection(product: product)
+                        }
                     } header: {
                         //MARK: Profile Pic and Horizontal Categories Section
                         headerSection // categories marked as header and pinned
@@ -30,7 +37,9 @@ struct HomeView: View {
                 }
                 .padding(.top, 8)
             }
-
+            .refreshable {
+                await refreshData()
+            }
             .scrollIndicators(.hidden)
             .clipped() // This is awesome, with this line we can hide the content 'behind' the lazy component
         }
@@ -100,6 +109,24 @@ struct HomeView: View {
         }
     }
     
+    private func newReleaseSection(product: Product) -> some View {
+        NewReleaseCell (
+            imageName: product.firstImage,
+            headline: product.brand,
+            subheadline: product.category,
+            title: product.title,
+            subtitle: product.description,
+            onAddToPlaylistPressed: nil,
+            onPlayPressed: nil
+            // for real apps we can...->
+//                                onAddToPlaylistPressed: {
+//                                        nil
+//                                },
+//                                onPlayPressed: {
+//
+//                                }
+        )
+    }
     // let's do this function more fun making all the data randomly by shuffle
     // in case static data is needed just uncomment the last 2 lines.
     private func fetchData() async {
@@ -121,6 +148,10 @@ struct HomeView: View {
         }
     }
     
+    // pull-to-refresh
+    func refreshData() async {
+        await fetchData()
+    }
 }
 
 #Preview {
