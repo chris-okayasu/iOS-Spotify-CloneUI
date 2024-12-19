@@ -11,36 +11,36 @@ struct HomeView: View {
     
     @State private var currentUser: User? = nil
     @State private var selectedCategory: Category? = nil
+    @State private var products: [Product] = []
+    
     var body: some View {
         ZStack{
-            Color.red.ignoresSafeArea() // full color of the screen
-//            Color.colorBg.ignoresSafeArea() // full color of the screen
+            Color.colorBg.ignoresSafeArea() // full color of the screen
             
-            //MARK: Profile Pic and Horizontal Categories
-            ScrollView(.vertical){
-                LazyVStack(spacing: 1, pinnedViews: [.sectionHeaders], content: {
+            ScrollView(.vertical) {
+                LazyVStack(spacing: 1, pinnedViews: [.sectionHeaders]) {
                     Section {
-                        ForEach(0..<10) { _ in
-                            Rectangle()
-                                .frame(width: 200, height: 200)
-                        }
+                        //MARK: Recents Section
+                        recentsSection
+                        .padding(.horizontal)
                     } header: {
-                        header
+                        //MARK: Profile Pic and Horizontal Categories Section
+                        headerSection // categories marked as header and pinned
                     }
-
-                })
+                }
                 .padding(.top, 8)
             }
+
             .scrollIndicators(.hidden)
             .clipped() // This is awesome, with this line we can hide the content 'behind' the lazy component
         }
         .task {
-            await fetchUser()
+            await fetchData()
         }
         .toolbar(.hidden, for: .navigationBar)
     }
     
-    private var header: some View {
+    private var headerSection: some View {
         HStack(spacing: 0){ // removing the space between profile pic and categories
             
             //NOTE: this ZStack is tricky and I want to mention since I think is cool,
@@ -81,14 +81,41 @@ struct HomeView: View {
         .padding(.vertical, 24)
 //        .background(Color.blue)
         .padding(.leading, 16) // Do not use horizontal since the components(categories) will cut before the screen ends
-        .background(Color.blue)
+        .background(Color.colorBg)
     }
     
+    private var recentsSection: some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(), spacing: 10), // First column
+                GridItem(.flexible(), spacing: 10)  // Second column
+            ],
+            spacing: 8 // between columns
+        ) {
+            ForEach(products, id: \.id) { p in
+                RecentsCell(imageName: p.firstImage, title: p.title)
+                    .frame(maxWidth: .infinity, minHeight: 20) // 50% min height
+                    .cornerRadius(8)
+            }
+        }
+    }
     
-    
-    private func fetchUser() async {
+    // let's do this function more fun making all the data randomly by shuffle
+    // in case static data is needed just uncomment the last 2 lines.
+    private func fetchData() async {
         do {
-            currentUser = try await APIHelper().getUsers().last // it must be only one user.
+            
+            let allProducts = try await APIHelper().getProducts()
+            let randomProducts = allProducts.shuffled().prefix(8)
+            products = Array(randomProducts)
+            
+            let allUsers = try await APIHelper().getUsers()
+            if let randomUser = allUsers.shuffled().first {
+                currentUser = randomUser
+            }
+            
+//            currentUser = try await APIHelper().getUsers().last // it must be only one user.
+//            products = try await Array(APIHelper().getProducts().prefix(8))
         } catch {
             
         }

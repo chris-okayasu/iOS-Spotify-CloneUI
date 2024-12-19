@@ -17,7 +17,7 @@ struct CategoryCell: View {
             .frame(minWidth: 35) // basically for 'All' since normal size looks horrible
             .padding(.vertical, 8)
             .padding(.horizontal, 10)
-            .background(isSelected ? .colorGreen : .colorDarkGray)
+            .themeColors(isSelected: isSelected)
             .cornerRadius(16)
     }
 }
