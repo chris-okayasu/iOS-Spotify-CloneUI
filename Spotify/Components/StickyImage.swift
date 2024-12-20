@@ -35,8 +35,11 @@ struct StickyImage: View {
             VStack {
                 // Use ZStack to layer the image and the text on top of it
                 ZStack {
+                    // Closure the image into rectagle to separate from the text and avoid weird movements
+                    // also this rectangle can help in weird scenarios where the size of the image is tricky
+                    
                     Rectangle()
-                        .opacity(0.5)
+                        .opacity(0.1)
                         .overlay(
                             // Display the image with dynamic resizing using AsyncImage
                             StickyImageLoader(urlString: image)
