@@ -19,7 +19,7 @@ struct ImageRowCell: View {
                 .frame(width: imageSize, height: imageSize)
             if let imageTitle {
                 Text(imageTitle)
-                    .lineLimit(2)
+                    .lineLimit(1)
                     .multilineTextAlignment(.leading)
                     .font(.callout)
                     .foregroundStyle(Color.colorLightGray)
@@ -27,7 +27,6 @@ struct ImageRowCell: View {
             }
         }
         .frame(width: imageSize)
-        .background(Color.red)
         
     }
 }

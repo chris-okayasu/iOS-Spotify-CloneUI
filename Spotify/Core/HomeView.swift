@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var currentUser: User? = nil
     @State private var selectedCategory: Category? = nil
     @State private var products: [Product] = []
+    @State private var productRows: [ProductRow] = []
     
     @State private var isRefreshing = false //pull-to-refresh
     
@@ -30,27 +31,11 @@ struct HomeView: View {
                         //MARK: New Releases Section
                         if let product = products.first {
                             newReleaseSection(product: product)
+                                .padding(.horizontal, 16)
                         }
                         
                         //MARK:
-                        VStack(spacing: 8){
-                            Text("Categories")
-                                .font(.title)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.colorLightGray)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            
-                            ScrollView(.horizontal){
-                                HStack{
-                                    ForEach(0..<10) { _ in
-                                        ImageRowCell()
-                                        
-                                    }
-                                    
-                                }
-                            }
-                            .scrollIndicators(.hidden)
-                        }
+                       listRows
                         
                     } header: {
                         //MARK: Header
@@ -149,25 +134,96 @@ struct HomeView: View {
 //                                }
         )
     }
-    // let's do this function more fun making all the data randomly by shuffle
-    // in case static data is needed just uncomment the last 2 lines.
-    private func fetchData() async {
-        do {
-            
-            let allProducts = try await APIHelper().getProducts()
-            let randomProducts = allProducts.shuffled().prefix(8)
-            products = Array(randomProducts)
-            
-            let allUsers = try await APIHelper().getUsers()
-            if let randomUser = allUsers.shuffled().first {
-                currentUser = randomUser
+    
+    private var listRows: some View {
+        ForEach(productRows) { row in
+            VStack(spacing: 8){
+                Text(row.title)
+                    .font(.title)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.colorLightGray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                
+                ScrollView(.horizontal){
+                    HStack(alignment: .top, spacing: 8){
+                        ForEach(row.products) { product in
+                            ImageRowCell(
+                                imageSize: 120,
+                                imageName: product.firstImage,
+                                imageTitle: product.title
+                            )
+                        }
+                        
+                    }
+                    .padding(.horizontal, 16)
+                    .background(Color.blue)
+                }
+                .scrollIndicators(.hidden)
+                
+                .background(Color.red)
             }
             
-//            currentUser = try await APIHelper().getUsers().last // it must be only one user.
-//            products = try await Array(APIHelper().getProducts().prefix(8))
-        } catch {
-            
         }
+    }
+    
+    // let's do this function more fun making all the data randomly by shuffle
+    private func fetchData() async {
+        do {
+            // Step 1: Fetch random products (up to 8)
+            try await fetchRandomProducts()
+            
+            // Step 2: Fetch a random user
+            try await fetchRandomUser()
+            
+            // Step 3: Generate rows of products, shuffling the same set of products for each row
+            generateProductRows()
+        } catch {
+            // Log any errors that occur during the data fetch process
+            print("Error fetching data: \(error)")
+        }
+    }
+
+    private func fetchRandomProducts() async throws {
+        // Fetch all products from the API
+        let allProducts = try await APIHelper().getProducts()
+        
+        // Shuffle the list and take the first 8 products
+        let randomProducts = allProducts.shuffled().prefix(8)
+        
+        // Store the selected products in the `products` array
+        products = Array(randomProducts)
+    }
+
+    private func fetchRandomUser() async throws {
+        // Fetch all users from the API
+        let allUsers = try await APIHelper().getUsers()
+        
+        // Shuffle the list of users and pick the first one (random selection)
+        if let randomUser = allUsers.shuffled().first {
+            currentUser = randomUser
+        }
+    }
+
+    private func generateProductRows() {
+        var rows: [ProductRow] = []
+        
+        // Get a unique set of brands from the `products` array
+        let allBrands = Set(products.map { $0.brand }) // Avoid duplicates
+        
+        for brand in allBrands {
+            // Shuffle all the fetched products, regardless of their brand
+            let shuffledProducts = self.products.shuffled()
+            
+            // Add a new ProductRow with the brand title and shuffled products
+            rows.append(ProductRow(
+                title: brand?.capitalized ?? "",  // Use the brand name (capitalized) as the row title
+                products: shuffledProducts       // Use the shuffled products for this row
+            ))
+        }
+        
+        // Assign the generated rows to the `productRows` property
+        productRows = rows
     }
     
     // pull-to-refresh
