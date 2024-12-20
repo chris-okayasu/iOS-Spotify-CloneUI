@@ -35,8 +35,12 @@ struct StickyImage: View {
             VStack {
                 // Use ZStack to layer the image and the text on top of it
                 ZStack {
-                    // Display the image with dynamic resizing using AsyncImage
-                    StickyImageLoader(urlString: image)
+                    Rectangle()
+                        .opacity(0.5)
+                        .overlay(
+                            // Display the image with dynamic resizing using AsyncImage
+                            StickyImageLoader(urlString: image)
+                        )
                         .frame(height: height) // Adjust height dynamically based on scroll offset
                         .clipped() // Clip any overflowing content to ensure the image doesn't spill outside
                         .overlay(

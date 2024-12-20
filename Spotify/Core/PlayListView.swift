@@ -20,6 +20,7 @@ struct PlayListHeader: View {
             textSize: 40,
             shadowColor: .colorBg
         )
+        
     }
 }
 
