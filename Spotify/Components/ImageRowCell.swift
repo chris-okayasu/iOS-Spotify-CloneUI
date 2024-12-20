@@ -24,6 +24,7 @@ struct ImageRowCell: View {
                     .font(.callout)
                     .foregroundStyle(Color.colorLightGray)
                     .padding(4)
+                    .padding(.bottom, 20)
             }
         }
         .frame(width: imageSize)

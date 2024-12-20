@@ -13,7 +13,6 @@ struct HomeView: View {
     @State private var selectedCategory: Category? = nil
     @State private var products: [Product] = []
     @State private var productRows: [ProductRow] = []
-    
     @State private var isRefreshing = false //pull-to-refresh
     
     var body: some View {
@@ -109,9 +108,17 @@ struct HomeView: View {
             spacing: 8 // between columns
         ) {
             ForEach(products, id: \.id) { p in
-                RecentsCell(imageName: p.firstImage, title: p.title)
+                Button(action: {
+                    print("Clicked \(p.title)")
+                }) {
+                    RecentsCell(
+                        imageName: p.firstImage,
+                        title: p.title
+                    )
                     .frame(maxWidth: .infinity, minHeight: 20) // 50% min height
                     .cornerRadius(8)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
         }
     }
@@ -148,20 +155,24 @@ struct HomeView: View {
                 ScrollView(.horizontal){
                     HStack(alignment: .top, spacing: 8){
                         ForEach(row.products) { product in
-                            ImageRowCell(
-                                imageSize: 120,
-                                imageName: product.firstImage,
-                                imageTitle: product.title
-                            )
+                            Button(action: {
+                                print("Cliking on \(product.title)")
+                            }){
+                                ImageRowCell(
+                                    imageSize: 120,
+                                    imageName: product.firstImage,
+                                    imageTitle: product.title
+                                )
+                            }
                         }
                         
                     }
                     .padding(.horizontal, 16)
-                    .background(Color.blue)
+//                    .background(Color.blue)
                 }
                 .scrollIndicators(.hidden)
                 
-                .background(Color.red)
+//                .background(Color.red)
             }
             
         }
