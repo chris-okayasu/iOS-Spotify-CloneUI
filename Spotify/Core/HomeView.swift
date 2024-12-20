@@ -27,11 +27,33 @@ struct HomeView: View {
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                         
+                        //MARK: New Releases Section
                         if let product = products.first {
                             newReleaseSection(product: product)
                         }
+                        
+                        //MARK:
+                        VStack(spacing: 8){
+                            Text("Categories")
+                                .font(.title)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.colorLightGray)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            ScrollView(.horizontal){
+                                HStack{
+                                    ForEach(0..<10) { _ in
+                                        ImageRowCell()
+                                        
+                                    }
+                                    
+                                }
+                            }
+                            .scrollIndicators(.hidden)
+                        }
+                        
                     } header: {
-                        //MARK: Profile Pic and Horizontal Categories Section
+                        //MARK: Header
                         headerSection // categories marked as header and pinned
                     }
                 }
