@@ -11,16 +11,34 @@ struct PlayListHeader: View {
     var title: String = "PlayListHeader"
     var subtitle: String = "Subtitle"
     var imageName: String = Constants.randomImage
-
+    var product: Product = .mock
+    var user: User = .mock
     var body: some View {
+        
         StickyImage(
-            image: imageName,
-            title: "title",
-            subtitle: "subtitle",
+            image: product.thumbnail,
+            title: product.title,
+            subtitle: product.brand,
             textSize: 40,
             shadowColor: .colorBg
         )
         
+//        ScrollView(.vertical){
+//            LazyVStack(spacing: 12){
+        PlaylistDescriptionCell(
+            descriptionText: product.description,
+            userName: user.firstName,
+            subheadline: product._brand,
+            onAddToPlaylistPressed: nil,
+            onDownloadPressed: nil,
+            onSharePressed: nil,
+            onEllipsisPressed: nil,
+            onShufflePressed: nil,
+            onPlayPressed: nil
+        )
+        .padding(.horizontal, 16)
+//            }
+//        }
     }
 }
 
@@ -29,16 +47,6 @@ struct PlayListHeader: View {
         Color.colorBg.ignoresSafeArea()
         ScrollView {
             PlayListHeader()
-
-            VStack {
-                ForEach(0..<20) { _ in
-                    Text("Content")
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 100)
-                        .background(Color.colorDarkGray)
-                        .padding(.horizontal)
-                }
-            }
         }
     }
 }
