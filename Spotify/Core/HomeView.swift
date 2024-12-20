@@ -31,6 +31,7 @@ struct HomeView: View {
                         if let product = products.first {
                             newReleaseSection(product: product)
                                 .padding(.horizontal, 16)
+                               
                         }
                         
                         //MARK:
