@@ -20,10 +20,16 @@ struct PlayListHeader: View {
         ZStack{
             StickyImage(
                 image: product.thumbnail,
-                title: product.title,
+                title: product.brand,
                 subtitle: product.brand,
                 textSize: 40,
-                shadowColor: .colorBg
+                shadowColor: .colorBg,
+                withHeader: true,
+                headerTitle: "This is a test",
+                titleColor: .colorGreen,
+                onBackPressed: {
+                   
+                }
             )
         }
         ScrollView(.vertical){
@@ -56,11 +62,11 @@ struct PlayListHeader: View {
                 }
             }
         }
+        .scrollIndicators(.hidden)
         .task {
             await fetchData()
         }
         .toolbar(.hidden, for: .navigationBar)
-        
     }
     private func fetchData() async {
         do {

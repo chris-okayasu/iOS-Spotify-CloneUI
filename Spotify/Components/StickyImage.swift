@@ -12,6 +12,7 @@
 /// It can also be used in Landscape.
 import SwiftUI
 
+
 // Main view that contains the image and the text over it
 struct StickyImage: View {
     // URL or name of the image to be displayed
@@ -24,6 +25,14 @@ struct StickyImage: View {
     var textSize: CGFloat?
     // Color for the shadow overlay to improve text visibility
     var shadowColor: Color
+    // Flag to determine if a header should be displayed
+    var withHeader: Bool = false
+    // Title of the header (optional)
+    var headerTitle: String? = nil
+    // Color of the title
+    var titleColor: Color? = nil
+    // Action for the back button
+    var onBackPressed: (() -> Void)?
 
     var body: some View {
         GeometryReader { geo in
@@ -33,11 +42,40 @@ struct StickyImage: View {
             let height = max(300 + scrollOffset, 300)
 
             VStack {
+                // Conditionally render the header if `withHeader` is true
+                if withHeader, let headerTitle = headerTitle {
+                    ZStack {
+                        HStack {
+                            // Back button on the left
+                            Image(systemName: "chevron.left")
+                                .font(.title3)
+                                .padding(10)
+                                .background(Color.black.opacity(0.7))
+                                .clipShape(Circle())
+                                .onTapGesture {
+                                    onBackPressed?() // Trigger the back action
+                                }
+
+                            Spacer()
+                        }
+                        .padding()
+
+                        // Centered title
+                        Text(headerTitle)
+                            .font(.title)
+                            .foregroundColor(titleColor?.opacity(1) ?? Color.primary)
+                            .bold()
+                            .padding(.leading, 40) // To avoid overlap with the back button
+                            
+                    }
+                    .padding(.top, 100)
+                    .frame(height: 0) // Fixed height for the header
+                    .background(Color.black.opacity(0.7)) // Background color for the header
+                    .zIndex(1) // Ensure the header is above the image
+                }
+                
                 // Use ZStack to layer the image and the text on top of it
                 ZStack {
-                    // Closure the image into rectagle to separate from the text and avoid weird movements
-                    // also this rectangle can help in weird scenarios where the size of the image is tricky
-                    
                     Rectangle()
                         .opacity(0.1)
                         .overlay(
@@ -71,8 +109,7 @@ struct StickyImage: View {
                             )
                             , alignment: .bottomLeading // Align the text and gradient to the bottom-left of the image
                         )
-                        // Apply the sticky modifier to make the image stretch with the scroll effect
-                        .modifier(StickyModifier(startingHeight: 300, geo: geo))
+                        .modifier(StickyModifier(startingHeight: 300, geo: geo)) // Apply sticky modifier to handle scroll behavior
                 }
                 .frame(height: height) // Set a fixed height for the header, which includes the image and text
             }
@@ -84,87 +121,83 @@ struct StickyImage: View {
 
 // Custom view for loading the image asynchronously
 struct StickyImageLoader: View {
-    // URL string to load the image
     var urlString: String
     
-    @State private var imageLoaded: Bool = false // State variable to track if the image is loaded
+    @State private var imageLoaded: Bool = false
     
     var body: some View {
-        // Use AsyncImage to load the image from the URL
         AsyncImage(url: URL(string: urlString)) { phase in
             switch phase {
             case .empty:
-                // Placeholder view displayed while the image is loading
-                Color.gray.opacity(0.3) // Display a gray placeholder
-                    .frame(maxWidth: .infinity, maxHeight: .infinity) // Fill the space
+                Color.gray.opacity(0.3)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             case .success(let image):
-                // Image loaded successfully
                 image
-                    .resizable() // Make the image resizable to fit its container
-                    .scaledToFill() // Scale the image to fill the container, potentially cropping it
-                    .clipped() // Clip any overflow of the image that goes beyond its bounds
+                    .resizable()
+                    .scaledToFill()
+                    .clipped()
                     .onAppear {
-                        imageLoaded = true // Set the imageLoaded state to true when the image appears
+                        imageLoaded = true
                     }
-                    // Apply scale effect and anchor it to the center of the container
                     .scaleEffect(1.0, anchor: .center)
             case .failure:
-                // Placeholder in case the image fails to load
-                Color.red.opacity(0.3) // Display a red failure placeholder
-                    .frame(maxWidth: .infinity, maxHeight: .infinity) // Fill the space
+                Color.red.opacity(0.3)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             @unknown default:
-                // Default fallback for unknown states (should not be needed)
-                Color.gray.opacity(0.3) // Display a gray fallback placeholder
-                    .frame(maxWidth: .infinity, maxHeight: .infinity) // Fill the space
+                Color.gray.opacity(0.3)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensure the image fills its container
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
 // View modifier for applying the stretch and scroll effect on the image
 struct StickyModifier: ViewModifier {
-    var startingHeight: CGFloat // The initial height of the image
-    var geo: GeometryProxy // GeometryProxy to track the image's position and size
-    var coordinateSpace: CoordinateSpace = .global // Coordinate space to use for positioning
+    var startingHeight: CGFloat
+    var geo: GeometryProxy
+    var coordinateSpace: CoordinateSpace = .global
 
     func body(content: Content) -> some View {
         content
-            .frame(width: geo.size.width, height: stretchedHeight()) // Set the width and dynamic height of the content
-            .clipped() // Clip any content that overflows the frame
-            .offset(y: stretchedOffset()) // Apply the vertical offset based on scroll position
+            .frame(width: geo.size.width, height: stretchedHeight())
+            .clipped()
+            .offset(y: stretchedOffset())
     }
 
     private func yOffset() -> CGFloat {
-        geo.frame(in: coordinateSpace).minY // Get the Y offset of the content
+        geo.frame(in: coordinateSpace).minY
     }
 
     private func stretchedHeight() -> CGFloat {
-        let offset = yOffset() // Get the current Y offset
-        return offset > 0 ? (startingHeight + offset) : startingHeight // Increase the height as the user scrolls down
+        let offset = yOffset()
+        return offset > 0 ? (startingHeight + offset) : startingHeight
     }
 
     private func stretchedOffset() -> CGFloat {
-        let offset = yOffset() // Get the current Y offset
-        return offset > 0 ? -offset : 0 // Apply a negative offset to stretch the content when scrolling up
+        let offset = yOffset()
+        return offset > 0 ? -offset : 0
     }
 }
 
 #Preview {
     ZStack {
-        // Set the background to black for contrast
         Color.black.edgesIgnoringSafeArea(.all)
         
-        // ScrollView to allow scrolling of the content
         ScrollView {
             VStack {
-                // Create the sticky image with the specified parameters
+                // Create the sticky image with the specified parameters, including header
                 StickyImage(
-                    image: "https://picsum.photos/800/800", // Image URL to load
-                    title: "Sticky Image", // Title text to display
-                    subtitle: "This is a Sticky subtitle", // Subtitle text to display
-                    textSize: 40, // Set the size of the title text
-                    shadowColor: .black // Shadow color for the gradient overlay
+                    image: "https://picsum.photos/800/800",
+                    title: "Sticky Image",
+                    subtitle: "This is a Sticky subtitle",
+                    textSize: 40,
+                    shadowColor: .black,
+                    withHeader: true, // Display the header
+                    headerTitle: "Playlist Header", // Title for the header
+                    onBackPressed: {
+                        print("Back button pressed") // Handle the back action
+                    }
                 )
             }
         }

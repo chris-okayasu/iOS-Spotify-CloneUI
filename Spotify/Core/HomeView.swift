@@ -178,7 +178,6 @@ struct HomeView: View {
             
         }
     }
-    
     // let's do this function more fun making all the data randomly by shuffle
     private func fetchData() async {
         do {
